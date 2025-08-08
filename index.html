@@ -1,17 +1,16 @@
 
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>English Playground · 60 Days</title>
-<meta name="description" content="60天每日自动刷新：最自然美式、句子拼拼乐、闪卡、场景对话、跟读录音。带进度条与打卡。"/>
+<meta name="description" content="A fun mini English site with daily tasks. 60-day auto-rotating content: choices, sentence builder, flashcards, dialogs + TTS, shadowing.">
 <style>
 :root{--bg:#0e1117;--panel:#141821;--soft:#1b2230;--line:#22304a;--text:#e7ebf1;--muted:#9fb0c9;--brand:#6aa5ff;--ok:#4caf50;--warn:#f5a524;--bad:#ef5350}
 *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:linear-gradient(160deg,#0e1117,#101423 40%,#0e1322);color:var(--text)}
-header{position:sticky;top:0;background:linear-gradient(0deg,#0f1424,#0b1020);border-bottom:1px solid var(--line);padding:12px 16px;z-index:10;display:flex;justify-content:space-between;align-items:center}
+header{position:sticky;top:0;background:linear-gradient(0deg,#0f1424,#0b1020);border-bottom:1px solid var(--line);padding:14px 16px;z-index:10}
 h1{margin:0;font-size:18px;letter-spacing:.4px}
-.badge{font-size:12px;color:#abc;background:#24324a;border:1px solid var(--line);padding:4px 8px;border-radius:10px}
 main{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:16px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -34,249 +33,285 @@ main{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:16px}
 .hr{height:1px;background:var(--line);margin:8px 0}
 footer{padding:24px 16px;text-align:center;color:var(--muted)}
 .switch{display:inline-flex;gap:8px;align-items:center}
-select{background:var(--soft);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
-progress{width:180px;height:12px}
+select{background:var(--soft);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.progress{height:10px;background:#26324a;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.progress>div{height:100%;background:linear-gradient(90deg,#6aa5ff,#61d0ff)}
 audio{width:100%}
+.badge{padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:#24324a;color:#b8c7e6;font-size:12px}
 </style>
 </head>
 <body>
 <header>
-  <h1>English Playground · 60 Days</h1>
-  <span class="badge" id="version">v60</span>
+  <h1>English Playground · 60 Days <span class="badge">v60</span></h1>
 </header>
 <main>
   <section class="card row">
     <div class="tabbar">
-      <button class="tab active" data-tab="daily">每日 10 分钟</button>
-      <button class="tab" data-tab="dialogs">实用对话</button>
-      <button class="tab" data-tab="picks">最自然美式</button>
-      <button class="tab" data-tab="order">句子拼拼乐</button>
-      <button class="tab" data-tab="cards">闪卡</button>
-      <button class="tab" data-tab="shadow">跟读 · 录音</button>
+      <button class="tab active" data-tab="daily">Daily</button>
+      <button class="tab" data-tab="dialogs">Dialogs</button>
+      <button class="tab" data-tab="picks">Choices</button>
+      <button class="tab" data-tab="order">Sentence Builder</button>
+      <button class="tab" data-tab="cards">Flashcards</button>
+      <button class="tab" data-tab="shadow">Shadow</button>
+      <button class="tab" data-tab="settings">Settings</button>
     </div>
     <span class="stat">Day <b id="dayNum">1</b> / 60</span>
-    <span class="stat">Streak <b id="streak">0</b> 天</span>
-    <span class="stat">完成度 <progress id="prog" max="100" value="0"></progress> <b id="progText">0%</b></span>
+    <span class="stat">Streak <b id="streak">0</b> d</span>
+    <div class="stat" style="min-width:220px">Progress
+      <div class="progress"><div id="progBar" style="width:0%"></div></div>
+    </div>
   </section>
 
   <section id="daily" class="card">
-    <div class="q big">今日任务：</div>
+    <div class="q big">Today's plan</div>
     <ol id="dailyList"></ol>
-    <div class="row"><button class="btn ok" id="btnDone">完成今天 ✅</button><span class="stat">今日已完成：<b id="doneToday">否</b></span></div>
-    <div class="hr"></div><div class="muted">每天包含：① 2题“最自然美式” ② 1句“拼拼乐” ③ 5张“闪卡” ④ 1段“对话跟读”。</div>
+    <div class="muted">Auto-rotates daily (2 choices + 1 builder + 5 flashcards + 1 dialog + shadow).</div>
   </section>
 
   <section id="dialogs" class="card" style="display:none">
-    <div class="row"><label>情境：</label>
-      <select id="dlgScene"><option value="travel">旅行/机场</option><option value="shopping">购物/商场</option><option value="daily">日常/寒暄</option><option value="restaurant">餐馆/点餐</option><option value="work">职场/邮件</option></select>
-      <span class="switch"><label>口音：</label><select id="accent"><option value="us">美式</option><option value="uk">英式</option></select></span>
-      <button class="btn" id="dlgPlay">🔊 朗读</button></div>
+    <div class="row">
+      <span class="switch"><label>Scene:</label>
+        <select id="dlgScene">
+          <option value="travel">Travel/Airport</option>
+          <option value="shopping">Shopping</option>
+          <option value="daily">Daily small talk</option>
+          <option value="restaurant">Restaurant</option>
+          <option value="work">Work/Email</option>
+        </select>
+      </span>
+      <span class="switch"><label>Accent:</label>
+        <select id="accent"><option value="en-US">US</option><option value="en-GB">UK</option></select>
+      </span>
+      <button class="btn" id="dlgPlay">🔊 Play</button>
+    </div>
     <div id="dlgBox" class="grid"></div>
   </section>
 
   <section id="picks" class="card" style="display:none">
     <div class="q" id="mcQ"></div><div id="mcOpts"></div><div class="muted" id="mcHint"></div>
-    <div class="row" style="margin-top:10px"><button class="btn" id="mcNext">下一题 ▶</button><span class="stat">正确 <b id="mcRight">0</b> / <b id="mcTotal">0</b></span></div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="mcNext">Next ▶</button><span class="stat">Right <b id="mcRight">0</b> / <b id="mcTotal">0</b></span></div>
   </section>
 
   <section id="order" class="card" style="display:none">
-    <div class="q" id="odQ"></div><div class="muted">点击词块排句（再点可取消）。</div>
+    <div class="q" id="odQ"></div><div class="muted">Tap words to build the sentence (tap again to remove).</div>
     <div class="drop" id="odDrop" style="margin-top:8px"></div><div id="odPool" style="margin-top:8px"></div>
-    <div class="row" style="margin-top:10px"><button class="btn ok" id="odCheck">检查</button><button class="btn ghost" id="odNext">下一句 ▶</button><span class="stat">正确 <b id="odRight">0</b> / <b id="odTotal">0</b></span></div>
+    <div class="row" style="margin-top:10px"><button class="btn ok" id="odCheck">Check</button><button class="btn ghost" id="odNext">Next ▶</button><span class="stat">Right <b id="odRight">0</b> / <b id="odTotal">0</b></span></div>
     <div class="muted" id="odHint"></div>
   </section>
 
   <section id="cards" class="card" style="display:none">
     <div class="q big" id="fcFront"></div><div class="muted" id="fcBack" style="display:none;margin-top:6px"></div>
-    <div class="row" style="margin-top:12px"><button class="btn ghost" id="fcFlip">显示释义</button><button class="btn bad" id="fcUnsure">Unsure</button><button class="btn ok" id="fcKnow">Know</button><span class="stat">已掌握 <b id="fcKnown">0</b></span></div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" id="fcFlip">Show meaning</button><button class="btn bad" id="fcUnsure">Unsure</button><button class="btn ok" id="fcKnow">Know</button><span class="stat">Known <b id="fcKnown">0</b></span></div>
   </section>
 
   <section id="shadow" class="card" style="display:none">
     <div class="q" id="shLine">Let's head out before it gets dark.</div>
-    <div class="row"><button class="btn" id="shSpeak">🔊 TTS</button><button class="btn" id="shRecord">⏺ 录音</button><button class="btn ghost" id="shStop" disabled>■ 停止</button><a id="shDownload" class="btn ghost" href="#" download="shadow.webm" style="display:none">下载录音</a></div>
-    <audio id="shAudio" controls style="margin-top:10px;display:none"></audio>
-    <div class="muted">录音仅保存在本地，不会上传。</div>
+    <div class="row"><button class="btn" id="shSpeak">🔊 TTS</button></div>
+    <div class="muted">Use system TTS to shadow the line above.</div>
+  </section>
+
+  <section id="settings" class="card" style="display:none">
+    <div class="row"><button class="btn ghost" id="reset">Reset progress</button></div>
   </section>
 </main>
-<footer>© 2025 English Playground · v60 · 60天自动换题</footer>
+<footer>© 2025 English Playground · v60 · auto-rotating daily content</footer>
 
 <script>
-const storeKey="eng-playground-v60";
-const S=JSON.parse(localStorage.getItem(storeKey)||"{}"); function save(){localStorage.setItem(storeKey,JSON.stringify(S));}
+// ------- basic state / tabs
+const key="eng-playground-60d"; const S=JSON.parse(localStorage.getItem(key)||"{}");
+function save(){localStorage.setItem(key,JSON.stringify(S));}
+document.querySelectorAll(".tab").forEach(b=>{b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active")); b.classList.add("active"); for(const id of ["daily","dialogs","picks","order","cards","shadow","settings"]) document.getElementById(id).style.display="none"; document.getElementById(b.dataset.tab).style.display="";});});
 
-// Tabs
-document.querySelectorAll(".tab").forEach(b=>{
-  b.addEventListener("click", ()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    for(const id of ["daily","dialogs","picks","order","cards","shadow"]) document.getElementById(id).style.display="none";
-    document.getElementById(b.dataset.tab).style.display="";
-  });
-});
+// ------- day calc (1..60)
+const now=new Date(); const start=new Date(now.getFullYear(),0,1);
+const dayIdx=((Math.floor((now-start)/86400000)+1) % 60) || 60; // 1..60
+document.getElementById("dayNum").textContent=dayIdx;
 
-// Date & Day index (1..60)
-const today = new Date();
-const base = new Date("2025-01-01");
-const diffDays = Math.floor((today - base)/(24*3600*1000));
-const dayIdx = (diffDays % 60 + 60) % 60; // 0..59
-document.getElementById("dayNum").textContent = (dayIdx+1);
+// ------- streak
+if(!S.streak){S.streak=0; S.last="";}
+const todayISO=now.toISOString().slice(0,10);
+if(S.last!==todayISO){ // increment when user visits new day
+  if(S.last && (new Date(S.last).getTime()+86400000===new Date(todayISO).getTime())) S.streak++; else S.streak = S.streak?S.streak+1:1;
+  S.last=todayISO; save();
+}
+document.getElementById("streak").textContent=S.streak;
 
-// Streak
-if(!S.streak){S.streak=0; S.lastDone=""; S.completed={}}
-function updateStreakUI(){ document.getElementById("streak").textContent=S.streak; document.getElementById("doneToday").textContent=(S.lastDone===today.toDateString()?"是":"否"); }
-updateStreakUI();
-document.getElementById("btnDone").onclick=()=>{
-  if (S.lastDone!==today.toDateString()){ S.streak = (S.lastDone && (new Date(S.lastDone).getTime()+86400000=== new Date(today.toDateString()).getTime())) ? (S.streak+1) : (S.streak?S.streak+1:1); S.lastDone=today.toDateString(); save(); }
-  updateStreakUI(); updateProgress();
+// ------- datasets (base pools)
+const baseMC=[
+ {q:"Most natural (US): 我两个月前去日本旅行了一趟。",opts:["Two months ago, I had a travel to Japan.","Two months ago, I went on a trip to Japan.","Two months ago, I made a travel to Japan."],a:1,why:"travel is mostly uncountable; go on/take a trip."},
+ {q:"Say you bumped into someone (口语):",opts:["I ran into her.","I met her by coincidence.","I bumped her into."],a:0,why:"run/bump into = bump into someone."},
+ {q:"美式：她朝我挥手并喊了我的名字。",opts:["She waved to me and shouted my name.","She waved at me and called out my name.","She waved me and yelled my name."],a:1,why:"wave at sb; call out my name."},
+ {q:"送人一程（美式）:",opts:["I gave Zhao a rider.","I gave Zhao a ride.","I gave Zhao a lift."],a:1,why:"give sb a ride (US); lift (UK)."},
+ {q:"点餐更自然：",opts:["I want chicken.","I'll have the chicken.","Give me chicken."],a:1,why:"I'll have ... is polite in restaurants."},
+ {q:"问路更自然：",opts:["How to subway?","How do I get to the subway station?","Where subway?"],a:1,why:"How do I get to ..."},
+ {q:"home 在哪句里是副词？",opts:["I drove her to home.","I drove her home.","I stayed at the home."],a:1,why:"drive sb home: home as adverb."},
+ {q:"口语“跨过去到那边”：",opts:["We went over to Japan last year.","We went to Japan over.","We over went to Japan."],a:0,why:"go over to + place."},
+ {q:"更自然的寒暄：",opts:["How are you doing?","How do you do? (casual)","How are you be?"],a:0,why:"How are you doing? is common casual greeting."},
+ {q:"机场安检：请把电子设备拿出来。",opts:["Please take out your devices.","Please out devices.","Device please take out."],a:0,why:"Grammatically correct polite request."}
+];
+
+const baseOrder=[
+ "Two months ago , my wife and I took a trip to Japan .",
+ "I ran into her on the street yesterday .",
+ "She gave me a ride home after the party .",
+ "Let's head out before it gets dark .",
+ "Could we sit by the window , please ?",
+ "How do I get to the subway station ?",
+ "I'll have the chicken , thanks .",
+ "Could you help me print the boarding pass ?"
+];
+
+const baseCards=[
+ ["give sb a ride","give someone a lift (US); give sb a ride"],
+ ["run into / bump into","to meet by chance (casual)"],
+ ["go/come over","go over to (cross over); come over (come here)"],
+ ["head out","set off; start leaving"],
+ ["go on / take a trip","go travel; take a trip"],
+ ["though / even though","although; even though = stronger"],
+ ["home (adv.)","go/drive/take sb home (no 'to')"],
+ ["drop sb off","take someone to a place and let them get out"],
+ ["pick sb up","go collect someone (by car)"],
+ ["I'll have ...","polite ordering phrase in restaurants"],
+ ["Could we sit by the window?","polite seating request"],
+ ["How do I get to ... ?","asking directions pattern"],
+ ["excuse me","polite attention-getter"],
+ ["by the way","topic-shift phrase"],
+ ["No worries.","casual 'it's okay'"]
+];
+
+const dialogs={
+  travel:[
+   ["Excuse me, where’s the check-in counter for Japan Airlines?",""],
+   ["How many bags are you checking?",""],
+   ["Just one. Can I keep this power bank in my carry-on?",""],
+   ["The gate changed to B12. Let's head over now.",""]
+  ],
+  shopping:[
+   ["Do you have this in medium?",""],
+   ["Is there any discount on this item?",""],
+   ["Can I try it on? The fitting rooms are over there, right?",""],
+   ["I’ll take this one. Could I pay by card?",""]
+  ],
+  daily:[
+   ["Hey! Long time no see. Guess who I ran into yesterday?",""],
+   ["No way—who?",""],
+   ["Prepper. She waved at me and called out my name.",""],
+   ["Nice! Did you guys catch up?",""]
+  ],
+  restaurant:[
+   ["Table for two, please.",""],
+   ["Could we sit by the window?",""],
+   ["I'll have the chicken, and she'll take the salad.",""],
+   ["Can we get the check, please?",""]
+  ],
+  work:[
+   ["I replied to my boss’s email yesterday afternoon.",""],
+   ["Could you drop by my desk later?",""],
+   ["Let's head out after the meeting.",""],
+   ["Sounds good. I'll catch up with you there.",""]
+  ]
 };
 
-// Data pools (sample extended set; real 60d uses rotations)
-const MC_POOL = [
- {q:"去旅行（最自然美式）",opts:["I had a travel.","I went on a trip.","I made a travel."],answer:1,why:"travel多为不可数；go on/take a trip 更自然。"},
- {q:"偶遇某人（口语）",opts:["I ran into her.","I met her by coincidence.","I bumped her into."],answer:0,why:"run into / bump into = 偶遇。"},
- {q:"给某人搭车（美式）",opts:["give sb a rider","give sb a ride","give sb a lift"],answer:1,why:"give sb a ride（美式），lift 偏英式。"},
- {q:"点餐礼貌表达",opts:["I want chicken.","I'll have the chicken.","Give me the chicken."],answer:1,why:"I'll have ... 最自然礼貌。"},
- {q:"问路更自然",opts:["How to subway?","How do I get to the subway station?","Where subway?"],answer:1,why:"How do I get to ..."},
- {q:"虽然/尽管",opts:["Though it was raining, we still went.","Although it's raining, we still go.","Even though it's rains."],answer:0,why:"语法与时态一致，1最自然。"}
-];
-const ORDER_POOL = [
- {q:"按顺序：两个月前我们去日本旅行。", ans:"Two months ago , my wife and I took a trip to Japan ."},
- {q:"按顺序：我们天黑前出发吧。", ans:"Let's head out before it gets dark ."},
- {q:"按顺序：她在派对后送我回家。", ans:"She gave me a ride home after the party ."},
- {q:"按顺序：请问到地铁站怎么走？", ans:"How do I get to the subway station ?"}
-];
-const CARDS_POOL = [
- {front:"head out",back:"出发、动身（口语）"},
- {front:"give sb a ride",back:"载某人一程（美式）"},
- {front:"go/come over",back:"（口语）跨过去/过来"},
- {front:"run/bump into",back:"偶遇某人"},
- {front:"go on / take a trip",back:"去旅行"},
- {front:"drop sb off",back:"把某人送到某处"},
- {front:"pick sb up",back:"去接某人"},
- {front:"I'll have ...",back:"点餐礼貌表达"},
- {front:"restroom / bathroom",back:"美式“洗手间”"},
- {front:"receipt / invoice",back:"收据 / 发票（购物）"}
-];
-const DIALOGS = {
- travel:[
-  {en:"Excuse me, where’s the check-in counter for Japan Airlines?",cn:"打扰一下，日本航空的值机柜台在哪里？"},
-  {en:"How many bags are you checking?",cn:"您要托运几个行李？"},
-  {en:"Just one. Can I keep this power bank in my carry-on?",cn:"就一个。这个充电宝可以随身带吗？"}
- ],
- shopping:[
-  {en:"Do you have this in medium?",cn:"这件有 M 码吗？"},
-  {en:"Can I try it on?",cn:"可以试穿吗？"},
-  {en:"Is there any discount on this item?",cn:"这件有折扣吗？"}
- ],
- daily:[
-  {en:"Hey, long time no see!",cn:"嘿，好久不见！"},
-  {en:"Guess who I ran into yesterday.",cn:"猜猜我昨天偶遇了谁。"},
-  {en:"No way—who?",cn:"不会吧——谁？"}
- ],
- restaurant:[
-  {en:"Table for two, please.",cn:"我们两位。"},
-  {en:"I'll have the chicken.",cn:"我要鸡肉。"},
-  {en:"Could we get the check, please?",cn:"请结账。"}
- ],
- work:[
-  {en:"I replied to my boss's email yesterday afternoon.",cn:"我昨天下午回复了老板的邮件。"},
-  {en:"Could you drop by my desk later?",cn:"待会儿到我工位一下？"},
-  {en:"Let's head out after the meeting.",cn:"会后我们出发吧。"}
- ]
-};
-
-// Simple deterministic picker based on dayIdx
-function pickN(arr, n){
-  const out=[]; for(let i=0;i<n;i++){ out.push(arr[(dayIdx*7 + i*3) % arr.length]); } return out;
+// ------- day-specific slicing (rotate content)
+function pickFrom(arr, n, seed){
+  // simple deterministic shuffle by seed
+  let a=arr.slice(); let r=seed%9973;
+  a.sort((x,y)=>{ r=(r*48271)%2147483647; return (r%3)-1; });
+  return a.slice(0, Math.min(n, a.length));
 }
 
-// Build daily sets
-const MC = pickN(MC_POOL, 2);
-const ORDER = pickN(ORDER_POOL, 1);
-const CARDS = pickN(CARDS_POOL, 5);
-const D_SCENES = ["travel","shopping","daily","restaurant","work"];
-const scene = D_SCENES[ dayIdx % D_SCENES.length ];
-
-// Render daily list
-const dailyItems=[
- `最自然美式 × ${MC.length}`,
- `句子拼拼乐 × ${ORDER.length}`,
- `闪卡 × ${CARDS.length}`,
- `对话跟读（${scene}） × 1`
+// daily plan text
+const plan=[
+ "Do 2 Choices",
+ "Build 1 sentence",
+ "Review 5 flashcards",
+ "Listen to 1 dialog (click 🔊)",
+ "Shadow the line"
 ];
-const dl=document.getElementById("dailyList"); dailyItems.forEach(t=>{ const li=document.createElement("li"); li.textContent=t; dl.appendChild(li); });
+const ul=document.getElementById("dailyList"); plan.forEach(t=>{const li=document.createElement("li"); li.textContent=t; ul.appendChild(li);});
 
-// MC
-let mcIdx=0, mcRight=S.mcRight||0, mcTotal=S.mcTotal||0;
+// ------- MC
+let mcIdx=0, mcRight=0, mcTotal=0;
+const MC=pickFrom(baseMC, 2 + (dayIdx%2), dayIdx*13);
 const mcQ=document.getElementById("mcQ"), mcOpts=document.getElementById("mcOpts"), mcHint=document.getElementById("mcHint");
 const mcRightEl=document.getElementById("mcRight"), mcTotalEl=document.getElementById("mcTotal");
-function renderMC(){ const item=MC[mcIdx%MC.length]; mcQ.textContent="Q: "+item.q; mcOpts.innerHTML=""; mcHint.textContent="";
-  item.opts.forEach((t,i)=>{ const btn=document.createElement("button"); btn.className="opt"; btn.textContent=t;
-    btn.onclick=()=>{ const ok=i===item.answer; btn.classList.add(ok?"correct":"wrong"); mcHint.textContent=(ok?"✅ 正确。":"❌ 再想想。")+" 解释："+item.why; mcTotal++; if(ok) mcRight++; mcRightEl.textContent=mcRight; mcTotalEl.textContent=mcTotal; S.mcRight=mcRight; S.mcTotal=mcTotal; save(); mcOpts.querySelectorAll("button").forEach(b=>b.disabled=true); updateProgress(); };
+function renderMC(){
+  const item=MC[mcIdx % MC.length]; mcQ.textContent="Q: "+item.q; mcOpts.innerHTML=""; mcHint.textContent="";
+  item.opts.forEach((t,i)=>{
+    const btn=document.createElement("button"); btn.className="opt"; btn.textContent=t;
+    btn.onclick=()=>{const ok=i===item.a; btn.classList.add(ok?"correct":"wrong");
+      mcHint.textContent=(ok?"✅ Correct. ":"❌ Try again. ")+"Why: "+item.why;
+      mcTotal++; if(ok) mcRight++; mcRightEl.textContent=mcRight; mcTotalEl.textContent=mcTotal; updateProgress(); mcOpts.querySelectorAll("button").forEach(b=>b.disabled=true);
+    };
     mcOpts.appendChild(btn);
   });
   mcRightEl.textContent=mcRight; mcTotalEl.textContent=mcTotal;
 }
-document.getElementById("mcNext").onclick=()=>{ mcIdx++; renderMC(); updateProgress(); };
-renderMC();
+document.getElementById("mcNext").onclick=()=>{mcIdx++; renderMC();}; renderMC();
 
-// ORDER
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
-let odIdx=0, odRight=S.odRight||0, odTotal=S.odTotal||0;
+// ------- ORDER
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
+let odIdx=0, odRight=0, odTotal=0;
+const ORDER=pickFrom(baseOrder, 1, dayIdx*17);
 const odQ=document.getElementById("odQ"), odDrop=document.getElementById("odDrop"), odPool=document.getElementById("odPool");
 const odRightEl=document.getElementById("odRight"), odTotalEl=document.getElementById("odTotal"), odHint=document.getElementById("odHint");
-function renderOD(){ const item=ORDER[odIdx%ORDER.length]; odQ.textContent="Q: "+item.q; odDrop.innerHTML=""; odHint.textContent="";
-  const toks=item.ans.split(" ").filter(x=>x.length); const pool=shuffle(toks.slice()); odPool.innerHTML="";
-  pool.forEach(t=>{ const p=document.createElement("button"); p.className="pill"; p.textContent=t;
-    p.onclick=()=>{ if(p.classList.contains("sel")){ const m=Array.from(odDrop.children).find(x=>x.dataset.id===p.dataset.id); if(m) m.remove(); p.classList.remove("sel"); }
-      else{ const s=document.createElement("span"); s.className="pill sel"; s.textContent=t; s.dataset.id=p.dataset.id=Math.random().toString(36).slice(2); odDrop.appendChild(s); p.classList.add("sel"); } updateProgress(); };
+function renderOD(){
+  const ans=ORDER[odIdx%ORDER.length]; odQ.textContent="Build: ("+ans.replace(/ ,/g,",").replace(/ \./g,".")+")";
+  odDrop.innerHTML=""; odHint.textContent="";
+  const toks=ans.split(" ").filter(x=>x.length); const pool=shuffle(toks.slice()); odPool.innerHTML="";
+  pool.forEach(t=>{const p=document.createElement("button"); p.className="pill"; p.textContent=t;
+    p.onclick=()=>{
+      if(p.classList.contains("sel")){ const m=[...odDrop.children].find(x=>x.dataset.id===p.dataset.id); if(m) m.remove(); p.classList.remove("sel"); }
+      else{ const s=document.createElement("span"); s.className="pill sel"; s.textContent=t; s.dataset.id=p.dataset.id=Math.random().toString(36).slice(2); odDrop.appendChild(s); p.classList.add("sel"); }
+    };
     odPool.appendChild(p);
   });
   odRightEl.textContent=odRight; odTotalEl.textContent=odTotal;
 }
-document.getElementById("odCheck").onclick=()=>{ const item=ORDER[odIdx%ORDER.length]; const guess=Array.from(odDrop.children).map(x=>x.textContent).join(" "); const ok=guess===item.ans; odHint.textContent=ok?"✅ 完美！":"❌ 正确答案："+item.ans; odTotal++; if(ok) odRight++; odRightEl.textContent=odRight; odTotalEl.textContent=odTotal; S.odRight=odRight; S.odTotal=odTotal; save(); updateProgress(); };
-document.getElementById("odNext").onclick=()=>{ odIdx++; renderOD(); updateProgress(); };
-renderOD();
+document.getElementById("odCheck").onclick=()=>{
+  const ans=ORDER[odIdx%ORDER.length]; const guess=[...odDrop.children].map(x=>x.textContent).join(" "); const ok=guess===ans;
+  odHint.textContent=ok?"✅ Perfect!":"❌ Answer: "+ans; odTotal++; if(ok) odRight++; odRightEl.textContent=odRight; odTotalEl.textContent=odTotal; updateProgress();
+};
+document.getElementById("odNext").onclick=()=>{odIdx++; renderOD();}; renderOD();
 
-// CARDS
-let fcIdx=0, known=S.known||{}; const fcFront=document.getElementById("fcFront"), fcBack=document.getElementById("fcBack"), fcKnown=document.getElementById("fcKnown");
-function renderFC(){ const item=CARDS[fcIdx%CARDS.length]; fcFront.textContent=item.front; fcBack.textContent=item.back; fcBack.style.display="none"; fcKnown.textContent=Object.values(known).filter(Boolean).length; }
-document.getElementById("fcFlip").onclick=()=>{ fcBack.style.display=(fcBack.style.display==="none"?"":"none"); };
-document.getElementById("fcUnsure").onclick=()=>{ known[CARDS[fcIdx%CARDS.length].front]=false; S.known=known; save(); fcIdx++; renderFC(); updateProgress(); };
-document.getElementById("fcKnow").onclick=()=>{ known[CARDS[fcIdx%CARDS.length].front]=true; S.known=known; save(); fcIdx++; renderFC(); updateProgress(); };
+// ------- CARDS
+let fcIdx=0; const CARDS=pickFrom(baseCards, 5, dayIdx*23);
+const fcFront=document.getElementById("fcFront"), fcBack=document.getElementById("fcBack"), fcKnown=document.getElementById("fcKnown");
+let known=0;
+function renderFC(){ const it=CARDS[fcIdx%CARDS.length]; fcFront.textContent=it[0]; fcBack.textContent=it[1]; fcBack.style.display="none"; fcKnown.textContent=known; }
+document.getElementById("fcFlip").onclick=()=>{fcBack.style.display=(fcBack.style.display==="none"?"":"none");};
+document.getElementById("fcUnsure").onclick=()=>{fcIdx++; renderFC(); updateProgress();};
+document.getElementById("fcKnow").onclick=()=>{known++; fcIdx++; renderFC(); updateProgress();};
 renderFC();
 
-// Dialogs + TTS
+// ------- Dialog + TTS
 const dlgBox=document.getElementById("dlgBox"); const dlgScene=document.getElementById("dlgScene"); const accentSel=document.getElementById("accent");
-function renderDlg(){ dlgBox.innerHTML=""; const arr=DIALOGS[dlgScene.value]; arr.forEach(line=>{ const div=document.createElement("div"); div.className="card"; div.innerHTML="<b>"+line.en+"</b><div class='muted' style='display:none'>"+line.cn+"</div>"; div.onclick=()=>{ const m=div.querySelector('.muted'); m.style.display = (m.style.display==='none'?'':'none'); }; dlgBox.appendChild(div); }); }
-renderDlg(); dlgScene.value=scene; renderDlg();
-document.getElementById("dlgPlay").onclick=()=>{ const arr=DIALOGS[dlgScene.value]; const utter=t=>{ const u=new SpeechSynthesisUtterance(t); u.rate=1.0; u.pitch=1.0; u.lang=accentSel.value==='us'?'en-US':'en-GB'; speechSynthesis.speak(u); }; arr.forEach((line,i)=>{ setTimeout(()=>utter(line.en), i*1500); }); };
+function renderDlg(){
+  dlgBox.innerHTML=""; const scene=dlgScene.value; const lines=dialogs[scene];
+  lines.forEach(line=>{const div=document.createElement("div"); div.className="card"; div.innerHTML="<b>"+line[0]+"</b>"; dlgBox.appendChild(div);});
+}
+renderDlg(); dlgScene.onchange=renderDlg;
+document.getElementById("dlgPlay").onclick=()=>{
+  const scene=dlgScene.value; const lines=dialogs[scene];
+  lines.forEach((line,i)=>{ const u=new SpeechSynthesisUtterance(line[0]); u.lang=accentSel.value; setTimeout(()=>speechSynthesis.speak(u), i*1400); });
+};
 
-// Shadow record
-const shLine=document.getElementById("shLine"); const shSpeak=document.getElementById("shSpeak"); const shRecord=document.getElementById("shRecord"); const shStop=document.getElementById("shStop"); const shAudio=document.getElementById("shAudio"); const shDownload=document.getElementById("shDownload");
-shSpeak.onclick=()=>{ const u=new SpeechSynthesisUtterance(shLine.textContent); u.lang='en-US'; speechSynthesis.speak(u); };
-let mediaRec, chunks=[];
-shRecord.onclick=async()=>{ try{ const stream=await navigator.mediaDevices.getUserMedia({audio:true}); mediaRec=new MediaRecorder(stream); chunks=[]; mediaRec.ondataavailable=e=>chunks.push(e.data);
-  mediaRec.onstop=()=>{ const blob=new Blob(chunks,{type:"audio/webm"}); const url=URL.createObjectURL(blob); shAudio.src=url; shAudio.style.display=''; shDownload.href=url; shDownload.style.display='inline-block'; };
-  mediaRec.start(); shRecord.disabled=true; shStop.disabled=false; } catch(e){ alert("录音失败（浏览器未授权/不支持）。"); } };
-shStop.onclick=()=>{ if(mediaRec && mediaRec.state!=='inactive'){ mediaRec.stop(); shRecord.disabled=false; shStop.disabled=true; } };
+// ------- Shadow
+document.getElementById("shSpeak").onclick=()=>{ const u=new SpeechSynthesisUtterance(document.getElementById("shLine").textContent); u.lang="en-US"; speechSynthesis.speak(u); };
 
-// Progress (MC:2, ORDER:1, CARDS:5, DIALOG:1, Shadow optional)
+// ------- Reset
+document.getElementById("reset").onclick=()=>{ if(confirm("Reset local progress?")) { localStorage.removeItem(key); location.reload(); } };
+
+// ------- progress bar (very simple heuristic)
 function updateProgress(){
-  let done=0, total=2+1+5+1;
-  // MC counted when mcIdx advanced beyond last and at least answered one in this session
-  done += Math.min(mcIdx, 2);
-  // ORDER: mark as done if any check attempted
-  done += (odTotal>0?1:0);
-  // CARDS: up to 5 interactions
-  done += Math.min(Object.values(known).length, 5);
-  // Dialog: play button as done once clicked
-  done += (S.dialogPlayed?1:0);
-  const percent=Math.round(done/total*100);
-  document.getElementById("prog").value=percent; document.getElementById("progText").textContent=percent+"%";
+  // weights: choices (2), order (1), cards (5). We'll clip to 100%.
+  const mcP = Math.min(100, (mcTotal? (mcRight/mcTotal):0) * 40);
+  const odP = Math.min(30, (odTotal? (odRight/odTotal):0) * 30);
+  const fcP = Math.min(30, (known/5) * 30);
+  const pct = Math.min(100, Math.round(mcP+odP+fcP));
+  document.getElementById("progBar").style.width = pct + "%";
 }
 updateProgress();
-document.getElementById("dlgPlay").addEventListener("click", ()=>{ S.dialogPlayed=true; save(); updateProgress(); });
 </script>
 </body>
 </html>
