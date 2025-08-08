@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>English Playground · 趣味英语在线</title>
+<meta name="description" content="一个轻量、好玩的英语小网页：每日10分钟路径、地道口语、实用对话、闪卡、句子拼拼乐、跟读录音。单文件、可离线、可一键部署为在线链接。" />
+<style>
+:root{--bg:#0e1117;--panel:#141821;--soft:#1b2230;--line:#22304a;--text:#e7ebf1;--muted:#9fb0c9;--brand:#6aa5ff;--ok:#4caf50;--warn:#f5a524;--bad:#ef5350}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:linear-gradient(160deg,#0e1117,#101423 40%,#0e1322);color:var(--text)}
+header{position:sticky;top:0;background:linear-gradient(0deg,#0f1424,#0b1020);border-bottom:1px solid var(--line);padding:14px 16px;z-index:10}
+h1{margin:0;font-size:18px;letter-spacing:.4px}
+main{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{appearance:none;border:none;background:var(--brand);color:#061021;padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+.btn.ghost{background:var(--soft);color:var(--text);border:1px solid var(--line)}
+.btn.ok{background:var(--ok);color:#fff}.btn.bad{background:var(--bad);color:#fff}.btn.warn{background:var(--warn);color:#222}
+.stat{background:var(--soft);border:1px solid var(--line);padding:6px 10px;border-radius:10px;font-size:13px;color:var(--muted)}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap}
+.tab{appearance:none;border:1px solid var(--line);background:var(--soft);color:var(--text);padding:8px 12px;border-radius:12px;cursor:pointer;font-weight:600}
+.tab.active{background:var(--brand);border-color:transparent;color:#061021}
+.q{font-size:17px;line-height:1.6}
+.opt{display:block;width:100%;text-align:left;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:10px;cursor:pointer}
+.opt.correct{outline:2px solid var(--ok)}.opt.wrong{outline:2px solid var(--bad)}
+.pill{background:var(--soft);border:1px dashed var(--line);padding:8px 10px;border-radius:12px;display:inline-block;margin:6px 6px 0 0;cursor:pointer}
+.pill.sel{background:#25324a;border-style:solid}
+.drop{min-height:46px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.muted{color:var(--muted);font-size:13px}
+.big{font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.hr{height:1px;background:var(--line);margin:8px 0}
+footer{padding:24px 16px;text-align:center;color:var(--muted)}
+.switch{display:inline-flex;gap:8px;align-items:center}
+select,textarea,input[type=text]{background:var(--soft);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+audio{width:100%}
+</style>
+</head>
+<body>
+<header><h1>English Playground · 趣味英语在线</h1></header>
+<main>
+  <section class="card row">
+    <div class="tabbar">
+      <button class="tab active" data-tab="daily">每日 10 分钟</button>
+      <button class="tab" data-tab="dialogs">实用对话</button>
+      <button class="tab" data-tab="picks">最自然美式</button>
+      <button class="tab" data-tab="order">句子拼拼乐</button>
+      <button class="tab" data-tab="cards">闪卡</button>
+      <button class="tab" data-tab="shadow">跟读 · 录音</button>
+      <button class="tab" data-tab="settings">设置</button>
+      <button class="tab" data-tab="publish">上线说明</button>
+    </div>
+    <span class="stat">Streak <b id="streak">0</b> 天</span>
+    <span class="stat">目标：每天 10 分钟 · 有趣不枯燥</span>
+  </section>
+
+  <section id="daily" class="card">
+    <div class="q big">今日任务（自动轮换）：</div>
+    <ol id="dailyList"></ol>
+    <div class="row"><button class="btn ok" id="btnDone">完成今天 ✅</button><span class="stat">今日已完成：<b id="doneToday">否</b></span></div>
+    <div class="hr"></div><div class="muted">每日包含：① 2题“最自然美式” ② 1句“拼拼乐” ③ 5张闪卡 ④ 1段“跟读”。</div>
+  </section>
+
+  <section id="dialogs" class="card" style="display:none">
+    <div class="row"><label>情境：</label>
+      <select id="dlgScene"><option value="travel">旅行/机场</option><option value="smalltalk">寒暄/闲聊</option><option value="restaurant">餐馆点餐</option><option value="work">职场/邮件</option></select>
+      <span class="switch"><label>口音：</label><select id="accent"><option value="us">美式</option><option value="uk">英式</option></select></span>
+      <button class="btn" id="dlgPlay">🔊 朗读</button></div>
+    <div id="dlgBox" class="grid"></div><div class="muted">点“朗读”用系统 TTS 发音；可反复练跟读。</div>
+  </section>
+
+  <section id="picks" class="card" style="display:none">
+    <div class="q" id="mcQ"></div><div id="mcOpts"></div><div class="muted" id="mcHint"></div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="mcNext">下一题 ▶</button><span class="stat">正确 <b id="mcRight">0</b> / <b id="mcTotal">0</b></span></div>
+  </section>
+
+  <section id="order" class="card" style="display:none">
+    <div class="q" id="odQ"></div><div class="muted">点击词块排句（再点可取消）。</div>
+    <div class="drop" id="odDrop" style="margin-top:8px"></div><div id="odPool" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:10px"><button class="btn ok" id="odCheck">检查</button><button class="btn ghost" id="odNext">下一句 ▶</button><span class="stat">正确 <b id="odRight">0</b> / <b id="odTotal">0</b></span></div>
+    <div class="muted" id="odHint"></div>
+  </section>
+
+  <section id="cards" class="card" style="display:none">
+    <div class="q big" id="fcFront"></div><div class="muted" id="fcBack" style="display:none;margin-top:6px"></div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" id="fcFlip">显示释义</button><button class="btn bad" id="fcUnsure">Unsure</button><button class="btn ok" id="fcKnow">Know</button><span class="stat">已掌握 <b id="fcKnown">0</b></span></div>
+  </section>
+
+  <section id="shadow" class="card" style="display:none">
+    <div class="q" id="shLine">Let's head out before it gets dark.</div>
+    <div class="row"><button class="btn" id="shSpeak">🔊 TTS</button><button class="btn" id="shRecord">⏺ 录音</button><button class="btn ghost" id="shStop" disabled>■ 停止</button><a id="shDownload" class="btn ghost" href="#" download="shadow.wav" style="display:none">下载录音</a></div>
+    <audio id="shAudio" controls style="margin-top:10px;display:none"></audio><div class="muted">不上传服务器，录音只在本地；可下载回放。</div>
+  </section>
+
+  <section id="settings" class="card" style="display:none">
+    <div class="row"><span class="switch"><label>每日目标（分钟）</label><select id="goal"><option>10</option><option>15</option><option>20</option></select></span><button class="btn ghost" id="reset">清空进度</button></div>
+    <div class="hr"></div><div class="muted">小贴士：将本页部署到 GitHub Pages/Netlify，就能得到一个在线链接，随时学、随时分享。</div>
+  </section>
+
+  <section id="publish" class="card" style="display:none">
+    <div class="q big">把这个页面“上线”为一个可直接打开的链接（无需服务器）</div>
+    <ol>
+      <li>去 <b>github.com</b> 新建一个公开仓库（比如 <code>english-playground</code>）。</li>
+      <li>上传 <code>index.html</code>（或整个压缩包解压后的所有文件）。</li>
+      <li>在仓库设置里找到 <b>Pages</b> → Source 选 <b>Deploy from a branch</b>，分支选 <b>main</b>，目录选 <b>/root</b>，保存。</li>
+      <li>几分钟后会出现一个网址，形如 <code>https://你的用户名.github.io/english-playground/</code>。</li>
+    </ol>
+  </section>
+</main>
+<footer>© 2025 English Playground · 单文件 / 可离线 / 一键部署</footer>
+
+<script>
+const storeKey="eng-playground-v1"; const S=JSON.parse(localStorage.getItem(storeKey)||"{}"); function save(){localStorage.setItem(storeKey,JSON.stringify(S));}
+document.querySelectorAll(".tab").forEach(b=>{b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");for(const id of ["daily","dialogs","picks","order","cards","shadow","settings","publish"])document.getElementById(id).style.display="none";document.getElementById(b.dataset.tab).style.display="";});});
+const today=new Date().toISOString().slice(0,10); if(!S.streak){S.streak=0;S.lastDone="";} function uStreak(){document.getElementById("streak").textContent=S.streak;document.getElementById("doneToday").textContent=(S.lastDone===today?"是":"否");} uStreak();
+document.getElementById("btnDone").onclick=()=>{if(S.lastDone!==today){S.streak=(S.lastDone&& (new Date(S.lastDone).getTime()+86400000===new Date(today).getTime()))?(S.streak+1):(S.streak?S.streak+1:1);S.lastDone=today;save();}uStreak();};
+const dailyItems=["做 2 题「最自然美式」→ 打开上方“最自然美式”","完成 1 句「句子拼拼乐」","刷 5 张「闪卡」","在「实用对话」里跟读 1 段（点 🔊）"]; const dl=document.getElementById("dailyList"); dailyItems.forEach(t=>{const li=document.createElement("li"); li.textContent=t; dl.appendChild(li);});
+
+const MC=[
+ {q:"最自然的美式：我两个月前去日本旅行了一趟。",opts:["Two months ago, I had a travel to Japan.","Two months ago, I went on a trip to Japan.","Two months ago, I made a travel to Japan."],answer:1,why:"travel 多为不可数；go on/take a trip 更自然。"},
+ {q:"更口语：我偶遇了她。",opts:["I ran into her.","I met her by coincidence.","I bumped her into."],answer:0,why:"run into / bump into = 偶遇；bump her into 语法错。"},
+ {q:"更自然（美式）：她朝我挥手并喊了我的名字。",opts:["She waved to me and shouted my name.","She waved at me and called out my name.","She waved me and yelled my name."],answer:1,why:"美式常说 wave at sb；叫名字更自然用 call out。"},
+ {q:"选择：我昨天送赵一程。",opts:["I gave Zhao a rider yesterday.","I gave Zhao a ride yesterday.","I gave Zhao a lift yesterday."],answer:1,why:"give sb a ride（美式）；lift 偏英式；rider=乘客。"},
+ {q:"虽然/尽管的自然用法：",opts:["Even though it was raining, we still went.","Though it was raining, we still went.","Although it's raining, we still go."],answer:1,why:"2 最自然；1 语气更强；3 时态不一致。"},
+ {q:"home 在哪句里是副词（到家）：",opts:["I drove her to home.","I drove her home.","I stayed at the home."],answer:1,why:"drive sb home 中 home 作副词；to home 不自然。"},
+ {q:"口语“跨过去到那边”：",opts:["We went over to Japan last year.","We went to Japan over.","We over went to Japan."],answer:0,why:"go over to + 地点。"},
+ {q:"餐馆点餐更自然：",opts:["I want chicken.","I’ll have the chicken.","Give me chicken."],answer:1,why:"点餐常用 I'll have ...（礼貌自然）。"},
+ {q:"问路：到地铁站怎么走？",opts:["How to subway?","How do I get to the subway station?","Where subway?"],answer:1,why:"How do I get to ... 为最自然问路表达。"},
+];
+
+const ORDER=[
+ {q:"按顺序：两个月前我和我老婆去日本旅行了一趟。",ans:"Two months ago , my wife and I took a trip to Japan ."},
+ {q:"按顺序：虽然下雨，我们还是去了。",ans:"Though it was raining , we still went ."},
+ {q:"按顺序：聚会结束后她送我回家。",ans:"She gave me a ride home after the party ."},
+ {q:"按顺序：我们在天黑前出发吧。",ans:"Let's head out before it gets dark ."},
+ {q:"按顺序：请问我们可以坐窗边吗？",ans:"Could we sit by the window , please ?"}
+];
+
+const CARDS=[
+ {front:"give sb a ride",back:"载某人一程（美式）"},
+ {front:"run into / bump into",back:"偶遇某人（口语）"},
+ {front:"go/come over",back:"（口语）跨过去/过来；go over to Japan"},
+ {front:"head out",back:"出发、动身（强调离开起点）"},
+ {front:"go on / take a trip",back:"去旅行（常用、通用）"},
+ {front:"though / even though",back:"虽然；even though 语气更强"},
+ {front:"home（副词）",back:"go/drive/take sb home，不加 to"},
+ {front:"drop sb off",back:"把某人送到某地（让他下车）"},
+ {front:"pick sb up",back:"去接某人（顺路/约定）"},
+ {front:"I'll have ...",back:"（点餐）我要……（礼貌自然）"}
+];
+
+const DIALOGS={
+ travel:[
+  {en:"Excuse me, where’s the check-in counter for Japan Airlines?",cn:"打扰一下，日本航空的值机柜台在哪里？"},
+  {en:"Could you help me print the boarding pass?",cn:"可以帮我打印登机牌吗？"},
+  {en:"How many bags are you checking?",cn:"您要托运几个行李？"},
+  {en:"Just one. Also, can I keep this power bank in my carry-on?",cn:"就一个。另外，这个充电宝可以随身带吗？"}
+ ],
+ smalltalk:[
+  {en:"Hey, long time no see! Guess who I ran into yesterday?",cn:"嘿，好久不见！猜猜我昨天偶遇了谁？"},
+  {en:"No way—who?",cn:"不会吧——谁？"},
+  {en:"Prepper. She waved at me and called out my name.",cn:"Prepper。她朝我挥手，还喊了我的名字。"},
+  {en:"Nice! Did you guys catch up?",cn:"不错！你们聊了聊吗？"}
+ ],
+ restaurant:[
+  {en:"Table for two, please.",cn:"我们两位。"},
+  {en:"Could we sit by the window?",cn:"我们可以坐窗边吗？"},
+  {en:"I’ll have the chicken, and she’ll take the salad.",cn:"我要鸡肉，她要沙拉。"},
+  {en:"Can we get the check, please?",cn:"可以结账吗？"}
+ ],
+ work:[
+  {en:"I replied to my boss’s email yesterday afternoon.",cn:"我昨天下午回复了老板的邮件。"},
+  {en:"Could you drop by my desk later?",cn:"你待会儿能到我工位来一下吗？"},
+  {en:"Let’s head out after the meeting.",cn:"开完会我们就走吧。"},
+  {en:"Sounds good. I’ll catch up with you there.",cn:"好，到那边再找你。"}
+ ]
+};
+
+// MC
+let mcIdx=S.mcIdx||0, mcRight=S.mcRight||0, mcTotal=S.mcTotal||0;
+const mcQ=document.getElementById("mcQ"), mcOpts=document.getElementById("mcOpts"), mcHint=document.getElementById("mcHint");
+const mcRightEl=document.getElementById("mcRight"), mcTotalEl=document.getElementById("mcTotal");
+function renderMC(){const item=MC[mcIdx%MC.length]; mcQ.textContent="Q: "+item.q; mcOpts.innerHTML=""; mcHint.textContent="";
+  item.opts.forEach((t,i)=>{const btn=document.createElement("button"); btn.className="opt"; btn.textContent=t;
+    btn.onclick=()=>{const ok=i===item.answer; btn.classList.add(ok?"correct":"wrong"); mcHint.textContent=(ok?"✅ 正确。":"❌ 再想想。")+" 解释："+item.why; mcTotal++; if(ok) mcRight++; mcRightEl.textContent=mcRight; mcTotalEl.textContent=mcTotal; S.mcRight=mcRight; S.mcTotal=mcTotal; save(); mcOpts.querySelectorAll("button").forEach(b=>b.disabled=true);};
+    mcOpts.appendChild(btn);});
+  mcRightEl.textContent=mcRight; mcTotalEl.textContent=mcTotal;}
+document.getElementById("mcNext").onclick=()=>{mcIdx++; S.mcIdx=mcIdx; save(); renderMC();}; renderMC();
+
+// ORDER
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
+let odIdx=S.odIdx||0, odRight=S.odRight||0, odTotal=S.odTotal||0;
+const odQ=document.getElementById("odQ"), odDrop=document.getElementById("odDrop"), odPool=document.getElementById("odPool");
+const odRightEl=document.getElementById("odRight"), odTotalEl=document.getElementById("odTotal"), odHint=document.getElementById("odHint");
+function renderOD(){const item=ORDER[odIdx%ORDER.length]; odQ.textContent="Q: "+item.q; odDrop.innerHTML=""; odHint.textContent="";
+  const toks=item.ans.split(" ").filter(x=>x.length); const pool=shuffle(toks.slice()); odPool.innerHTML="";
+  pool.forEach(t=>{const p=document.createElement("button"); p.className="pill"; p.textContent=t;
+    p.onclick=()=>{if(p.classList.contains("sel")){const m=Array.from(odDrop.children).find(x=>x.dataset.id===p.dataset.id); if(m) m.remove(); p.classList.remove("sel");}
+      else{const s=document.createElement("span"); s.className="pill sel"; s.textContent=t; s.dataset.id=p.dataset.id=Math.random().toString(36).slice(2); odDrop.appendChild(s); p.classList.add("sel");}};
+    odPool.appendChild(p);}); odRightEl.textContent=odRight; odTotalEl.textContent=odTotal;}
+document.getElementById("odCheck").onclick=()=>{const item=ORDER[odIdx%ORDER.length]; const guess=Array.from(odDrop.children).map(x=>x.textContent).join(" "); const ok=guess===item.ans; odHint.textContent=ok?"✅ 完美！":"❌ 正确答案："+item.ans; odTotal++; if(ok) odRight++; odRightEl.textContent=odRight; odTotalEl.textContent=odTotal; S.odRight=odRight; S.odTotal=odTotal; save();};
+document.getElementById("odNext").onclick=()=>{odIdx++; S.odIdx=odIdx; save(); renderOD();}; renderOD();
+
+// CARDS
+let fcIdx=S.fcIdx||0, known=S.known||{}; const fcFront=document.getElementById("fcFront"), fcBack=document.getElementById("fcBack"), fcKnown=document.getElementById("fcKnown");
+function renderFC(){const item=CARDS[fcIdx%CARDS.length]; fcFront.textContent=item.front; fcBack.textContent=item.back; fcBack.style.display="none"; fcKnown.textContent=Object.values(known).filter(Boolean).length;}
+document.getElementById("fcFlip").onclick=()=>{fcBack.style.display=(fcBack.style.display==="none"?"":"none");};
+document.getElementById("fcUnsure").onclick=()=>{known[CARDS[fcIdx%CARDS.length].front]=false; S.known=known; save(); fcIdx++; S.fcIdx=fcIdx; save(); renderFC();};
+document.getElementById("fcKnow").onclick=()=>{known[CARDS[fcIdx%CARDS.length].front]=true; S.known=known; save(); fcIdx++; S.fcIdx=fcIdx; save(); renderFC();}; renderFC();
+
+// DIALOGS + TTS
+const dlgBox=document.getElementById("dlgBox"); const dlgScene=document.getElementById("dlgScene"); const accentSel=document.getElementById("accent");
+function renderDlg(){dlgBox.innerHTML=""; const arr=DIALOGS[dlgScene.value]; arr.forEach(line=>{const div=document.createElement("div"); div.className="card"; div.innerHTML="<b>"+line.en+"</b><div class='muted'>"+line.cn+"</div>"; dlgBox.appendChild(div);});}
+renderDlg(); dlgScene.onchange=renderDlg;
+document.getElementById("dlgPlay").onclick=()=>{const arr=DIALOGS[dlgScene.value]; const utter=t=>{const u=new SpeechSynthesisUtterance(t); u.rate=1.0; u.pitch=1.0; u.lang=accentSel.value==="us"?"en-US":"en-GB"; speechSynthesis.speak(u);}; arr.forEach((line,i)=>{setTimeout(()=>utter(line.en),i*1500);});};
+
+// Shadow record
+const shLine=document.getElementById("shLine"); const shSpeak=document.getElementById("shSpeak"); const shRecord=document.getElementById("shRecord"); const shStop=document.getElementById("shStop"); const shAudio=document.getElementById("shAudio"); const shDownload=document.getElementById("shDownload");
+shSpeak.onclick=()=>{const u=new SpeechSynthesisUtterance(shLine.textContent); u.lang="en-US"; speechSynthesis.speak(u);};
+let mediaRec, chunks=[];
+shRecord.onclick=async()=>{try{const stream=await navigator.mediaDevices.getUserMedia({audio:true}); mediaRec=new MediaRecorder(stream); chunks=[]; mediaRec.ondataavailable=e=>chunks.push(e.data);
+  mediaRec.onstop=()=>{const blob=new Blob(chunks,{type:"audio/webm"}); const url=URL.createObjectURL(blob); shAudio.src=url; shAudio.style.display=""; shDownload.href=url; shDownload.download="shadow.webm"; shDownload.style.display="inline-block";};
+  mediaRec.start(); shRecord.disabled=True; shStop.disabled=False;}catch(e){alert("录音失败（浏览器未授权/不支持）。");}};
+shStop.onclick=()=>{if(mediaRec && mediaRec.state!=="inactive"){mediaRec.stop(); shRecord.disabled=False; shStop.disabled=True;}};
+
+// Settings
+document.getElementById("reset").onclick=()=>{if(confirm("清空所有进度？")){localStorage.removeItem(storeKey); location.reload();}};
+</script>
+</body>
+</html>
